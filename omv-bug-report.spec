@@ -1,7 +1,7 @@
 Summary:	OMV bug helper
 Name:		omv-bug-report
 Version:	0.0.1
-Release:	2
+Release:	3
 License:	GPLv3+
 Group:		System/Base
 Url:		%{disturl}
