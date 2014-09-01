@@ -253,11 +253,22 @@ echo -n "Running $(basename $0)...";
 ) | $XZ_CMD >> $LOG_FILENAME
 
 
+# hostnamectl information
+
+(
+
+    echo ""
+    echo "____________________________________________"
+    echo ""
+    echo "System host infrmation:"
+    echo ""
+    hostnamectl 2> /dev/null
+) | $XZ_CMD >> $LOG_FILENAME
+
 # append useful files
-
 append "/etc/distro-release"
-
 append_silent "/etc/os-release"
+
 # append environment output
 
 (
@@ -280,7 +291,6 @@ append "/proc/interrupts"
 append "/proc/meminfo"
 append "/proc/modules"
 append "/proc/version"
-append "/proc/pci"
 append "/proc/asound/cards"
 append "/proc/asound/pcm"
 append "/proc/asound/modules"
@@ -308,7 +318,6 @@ done
 #    | while read DIR; do
 #        append_silent "$DIR/.xsession-errors"
 #    done
-
 
 
 # append installed rpm output
