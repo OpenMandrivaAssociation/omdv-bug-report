@@ -50,7 +50,7 @@ usage() {
     echo ""
 }
 
-OMV_BUG_REPORT_CHANGE='$Change: 001 $'
+OMV_BUG_REPORT_CHANGE='$Change: 002 $'
 OMV_BUG_REPORT_VERSION=`echo "$OMV_BUG_REPORT_CHANGE" | tr -c -d "[:digit:]"`
 
 # Set the default filename so that it won't be empty in the usage message
