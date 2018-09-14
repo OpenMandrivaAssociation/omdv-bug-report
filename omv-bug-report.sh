@@ -9,8 +9,8 @@ PATH="/sbin:/usr/sbin:$PATH"
 BASE_LOG_FILENAME="omv-bug-report.log"
 
 # check if XZ is present
-XZ_CMD=`which xz 2> /dev/null | head -n 1`
-if [ $? -eq 0 -a "$XZ_CMD" ]; then
+XZ_CMD="$(which xz 2> /dev/null | head -n 1)"
+if [ $? -eq 0 ] && [ "$XZ_CMD" ]; then
     XZ_CMD="xz -0f --text -T0 -c"
 else
     XZ_CMD="cat"
@@ -28,30 +28,30 @@ set_filename() {
 
 
 usage_bug_report_message() {
-    echo "Please include the '$LOG_FILENAME' log file when reporting"
-    echo "your bug via the OpenMandriva bugzilla (see issues.openmandriva.org)."
+    print '%s\n' "Please include the '$LOG_FILENAME' log file when reporting"
+    print '%s\n' "your bug via the OpenMandriva bugzilla (see issues.openmandriva.org)."
 }
 
 usage() {
-    echo ""
-    echo "$(basename $0): OpenMandriva bug reporting shell script."
-    echo ""
+    print '%s\n' ""
+    print '%s\n' "$(basename $0): OpenMandriva bug reporting shell script."
+    print '%s\n' ""
     usage_bug_report_message
-    echo ""
-    echo "$(basename $0) [OPTION]..."
-    echo "    -h / --help"
-    echo "        Print this help output and exit."
-    echo "    --output-file <file>"
-    echo "        Write output to <file>. If xz is available, the output file"
-    echo "        will be automatically compressed, and \".xz\" will be appended"
-    echo "        to the filename. Default: write to omv-bug-report.log(.xz)."
-    echo "    --safe-mode"
-    echo "        Disable some parts of the script that may hang the system."
-    echo ""
+    print '%s\n' ""
+    print '%s\n' "$(basename $0) [OPTION]..."
+    print '%s\n' "    -h / --help"
+    print '%s\n' "        Print this help output and exit."
+    print '%s\n' "    --output-file <file>"
+    print '%s\n' "        Write output to <file>. If xz is available, the output file"
+    print '%s\n' "        will be automatically compressed, and \".xz\" will be appended"
+    print '%s\n' "        to the filename. Default: write to omv-bug-report.log(.xz)."
+    print '%s\n' "    --safe-mode"
+    print '%s\n' "        Disable some parts of the script that may hang the system."
+    print '%s\n' ""
 }
 
 OMV_BUG_REPORT_CHANGE='$Change: 002 $'
-OMV_BUG_REPORT_VERSION=`echo "$OMV_BUG_REPORT_CHANGE" | tr -c -d "[:digit:]"`
+OMV_BUG_REPORT_VERSION="$(echo "$OMV_BUG_REPORT_CHANGE" | tr -c -d "[:digit:]")"
 
 # Set the default filename so that it won't be empty in the usage message
 set_filename
@@ -103,19 +103,19 @@ echo_metadata() {
 
 append() {
     (
-        echo "____________________________________________"
-        echo ""
+        print '%s\n' "____________________________________________"
+        print '%s\n' ""
 
         if [ ! -f "$1" ]; then
-            echo "*** $1 does not exist"
+            print '%s\n' "*** $1 does not exist"
         elif [ ! -r "$1" ]; then
-            echo "*** $1 is not readable"
+            print '%s\n' "*** $1 is not readable"
         else
-            echo "*** $1"
+            print '%s\n' "*** $1"
             echo_metadata "$1"
             cat  "$1"
         fi
-        echo ""
+        print '%s\n' ""
     ) | $XZ_CMD >> $LOG_FILENAME
 }
 
@@ -126,13 +126,13 @@ append() {
 
 append_silent() {
     (
-        if [ -f "$1" -a -r "$1" ]; then
-            echo "____________________________________________"
-            echo ""
-            echo "*** $1"
+        if [ -f "$1" ] && [ -r "$1" ]; then
+            print '%s\n' "____________________________________________"
+            print '%s\n' ""
+            print '%s\n' "*** $1"
             echo_metadata "$1"
             cat  "$1"
-            echo ""
+            print '%s\n' ""
         fi
     ) | $XZ_CMD >> $LOG_FILENAME
 }
@@ -143,7 +143,7 @@ append_silent() {
 #
 
 append_glob() {
-    for i in `ls $1 2> /dev/null;`; do
+    for i in $(ls $1 2> /dev/null;); do
         append "$i"
     done
 }
@@ -169,20 +169,20 @@ append_file_or_dir_silent() {
 
 append_binary_file() {
     (
-        base64=`which base64 2> /dev/null | head -n 1`
+        base64="$(which base64 2> /dev/null | head -n 1)"
 
-        if [ $? -eq 0 -a -x "$base64" ]; then
-                if [ -f "$1" -a -r "$1" ]; then
-                    echo "____________________________________________"
-                    echo ""
-                    echo "base64 \"$1\""
-                    echo ""
+        if [ $? -eq 0 ] && [ -x "$base64" ]; then
+                if [ -f "$1" ] && [ -r "$1" ]; then
+                    print '%s\n' "____________________________________________"
+                    print '%s\n' ""
+                    print '%s\n' "base64 \"$1\""
+                    print '%s\n' ""
                     base64 "$1" 2> /dev/null
-                    echo ""
+                    print '%s\n' ""
                 fi
         else
-            echo "Skipping $1 output (base64 not found)"
-            echo ""
+            print '%s\n' "Skipping $1 output (base64 not found)"
+            print '%s\n' ""
         fi
 
     ) | $XZ_CMD >> $LOG_FILENAME
@@ -196,8 +196,8 @@ append_binary_file() {
 # check that we are root (needed for `lspci -vxxx` and potentially for
 # accessing kernel log files)
 
-if [ `id -u` -ne 0 ]; then
-    echo "ERROR: Please run $(basename $0) as root."
+if [ "$(id -u)" -ne 0 ]; then
+    print '%s\n' "ERROR: Please run $(basename $0) as root."
     exit 1
 fi
 
@@ -214,42 +214,42 @@ fi
 touch $LOG_FILENAME 2> /dev/null
 
 if [ $? -ne 0 ]; then
-    echo
-    echo "ERROR: Working directory is not writable; please cd to a directory"
-    echo "       where you have write permission so that the $LOG_FILENAME"
-    echo "       file can be written."
-    echo
+    print '%s\n' ""
+    print '%s\n' "ERROR: Working directory is not writable; please cd to a directory"
+    print '%s\n' "       where you have write permission so that the $LOG_FILENAME"
+    print '%s\n' "       file can be written."
+    print '%s\n' ""
     exit 1
 fi
 
 
 # print a start message to stdout
 
-echo ""
-echo "omv-bug-report.sh will now collect information about your"
-echo "system and create the file '$LOG_FILENAME' in the current"
-echo "directory.  It may take several seconds to run."
-echo ""
+print '%s\n' ""
+print '%s\n' "omv-bug-report.sh will now collect information about your"
+print '%s\n' "system and create the file '$LOG_FILENAME' in the current"
+print '%s\n' "directory.  It may take several seconds to run."
+print '%s\n' ""
 usage_bug_report_message
-echo ""
-echo -n "Running $(basename $0)...";
+print '%s\n' ""
+print '%s\n' "Running $(basename $0)...";
 
 
 # print prologue to the log file
 
 (
-    echo "____________________________________________"
-    echo ""
-    echo "Start of OpenMandriva bug report log file.  Please include this file, along"
-    echo "with a detailed description of your problem, when reporting a bug"
-    echo "via the OpenMandriva bugzilla (see issues.openmandriva.org)."
-    echo ""
-    echo "omv-bug-report.sh Version: $OMV_BUG_REPORT_VERSION"
-    echo ""
-    echo "Date: `date`"
-    echo "uname: `uname -a`"
-    echo "command line flags: $SAVED_FLAGS"
-    echo ""
+    print '%s\n' "____________________________________________"
+    print '%s\n' ""
+    print '%s\n' "Start of OpenMandriva bug report log file.  Please include this file, along"
+    print '%s\n' "with a detailed description of your problem, when reporting a bug"
+    print '%s\n' "via the OpenMandriva bugzilla (see issues.openmandriva.org)."
+    print '%s\n' ""
+    print '%s\n' "omv-bug-report.sh Version: $OMV_BUG_REPORT_VERSION"
+    print '%s\n' ""
+    print '%s\n' "Date: $(date)"
+    print '%s\n' "uname: $(uname -a)"
+    print '%s\n' "command line flags: $SAVED_FLAGS"
+    print '%s\n' ""
 ) | $XZ_CMD >> $LOG_FILENAME
 
 
@@ -257,11 +257,11 @@ echo -n "Running $(basename $0)...";
 
 (
 
-    echo ""
-    echo "____________________________________________"
-    echo ""
-    echo "System host infrmation:"
-    echo ""
+    print '%s\n' ""
+    print '%s\n' "____________________________________________"
+    print '%s\n' ""
+    print '%s\n' "System host infrmation:"
+    print '%s\n' ""
     hostnamectl 2> /dev/null
 ) | $XZ_CMD >> $LOG_FILENAME
 
@@ -272,11 +272,11 @@ append_silent "/etc/os-release"
 # append environment output
 
 (
-    echo ""
-    echo "____________________________________________"
-    echo ""
-    echo "Environment settings:"
-    echo ""
+    print '%s\n' ""
+    print '%s\n' "____________________________________________"
+    print '%s\n' ""
+    print '%s\n' "Environment settings:"
+    print '%s\n' ""
     systemctl show-environment 2> /dev/null
 ) | $XZ_CMD >> $LOG_FILENAME
 
@@ -323,91 +323,91 @@ done
 # append installed rpm output
 
 (
-    echo ""
-    echo "____________________________________________"
-    echo ""
-    echo "Installed packages:"
-    echo ""
-    rpm -qa |sort -u 2> /dev/null
+    print '%s\n' ""
+    print '%s\n' "____________________________________________"
+    print '%s\n' ""
+    print '%s\n' "Installed packages:"
+    print '%s\n' ""
+    rpm -qa | sort -u 2> /dev/null
 ) | $XZ_CMD >> $LOG_FILENAME
 
 
 # lspcidrake information
 
 (
-    echo "____________________________________________"
-    echo ""
+    print '%s\n' "____________________________________________"
+    print '%s\n' ""
 
-    lspcidrake=`which lspcidrake 2> /dev/null | head -n 1`
+    lspci="$(which lspci 2> /dev/null | head -n 1)"
 
-    if [ $? -eq 0 -a -x "$lspcidrake" ]; then
-        echo "$lspcidrake"
-        echo ""
-        $lspcidrake -v 2> /dev/null
-        echo ""
+    if [ $? -eq 0 ] && [ -x "$lspci" ]; then
+        print '%s\n' "$lspci"
+        print '%s\n' ""
+        $lspci -v 2> /dev/null
+        print '%s\n' ""
     else
-        echo "Skipping lspcidrake output (lspcidrake not found)"
-        echo ""
+        print '%s\n' "Skipping lspci output (lspci not found)"
+        print '%s\n' ""
     fi
 ) | $XZ_CMD >> $LOG_FILENAME
 
 # lsusb information
 
 (
-    echo "____________________________________________"
-    echo ""
+    print '%s\n' "____________________________________________"
+    print '%s\n' ""
 
-    lsusb=`which lsusb 2> /dev/null | head -n 1`
+    lsusb="$(which lsusb 2> /dev/null | head -n 1)"
 
-    if [ $? -eq 0 -a -x "$lsusb" ]; then
-        echo "$lsusb"
-        echo ""
+    if [ $? -eq 0 ] && [ -x "$lsusb" ]; then
+        print '%s\n' "$lsusb"
+        print '%s\n' ""
         $lsusb 2> /dev/null
-        echo ""
+        print '%s\n' ""
     else
-        echo "Skipping lsusb output (lsusb not found)"
-        echo ""
+        print '%s\n' "Skipping lsusb output (lsusb not found)"
+        print '%s\n' ""
     fi
 ) | $XZ_CMD >> $LOG_FILENAME
 
 # dmidecode
 
 (
-    echo "____________________________________________"
-    echo ""
+    print '%s\n' "____________________________________________"
+    print '%s\n' ""
 
-    dmidecode=`which dmidecode 2> /dev/null | head -n 1`
+    dmidecode="$(which dmidecode 2> /dev/null | head -n 1)"
 
-    if [ $? -eq 0 -a -x "$dmidecode" ]; then
-        echo "$dmidecode"
-        echo ""
+    if [ $? -eq 0 ] && [ -x "$dmidecode" ]; then
+        print '%s\n' "$dmidecode"
+        print '%s\n' ""
         $dmidecode 2> /dev/null
-        echo ""
+        print '%s\n' ""
     else
-        echo "Skipping dmidecode output (dmidecode not found)"
-        echo ""
+        print '%s\n' "Skipping dmidecode output (dmidecode not found)"
+        print '%s\n' ""
     fi
 ) | $XZ_CMD >> $LOG_FILENAME
 
 # append journalctl output
 
 (
-    echo ""
-    echo "____________________________________________"
-    echo ""
-    echo "Systemd boot log:"
-    echo ""
+    print '%s\n' ""
+    print '%s\n' "____________________________________________"
+    print '%s\n' ""
+    print '%s\n' "Systemd boot log:"
+    print '%s\n' ""
     journalctl -b 2> /dev/null
 ) | $XZ_CMD >> $LOG_FILENAME
 
 # append systemctl --failed output
 
 (
-    echo ""
-    echo "____________________________________________"
-    echo ""
-    echo "Systemd failed units:"
-    echo ""
+    print '%s\n' ""
+    print '%s\n' "____________________________________________"
+    print '%s\n' ""
+    print '%s\n' "Systemd failed units:"
+    print '%s\n' ""
     systemctl --no-pager --failed 2> /dev/null
 ) | $XZ_CMD >> $LOG_FILENAME
 
@@ -416,15 +416,15 @@ done
 (
     which gcc >/dev/null 2>&1
     if [ $? -eq 0 ]; then
-        echo "____________________________________________"
-        echo ""
+        print '%s\n' "____________________________________________"
+        print '%s\n' ""
         gcc -v 2>&1
     fi
 
     which g++ >/dev/null 2>&1
     if [ $? -eq 0 ]; then
-        echo "____________________________________________"
-        echo ""
+        print '%s\n' "____________________________________________"
+        print '%s\n' ""
         g++ -v 2>&1
     fi
 ) | $XZ_CMD >> $LOG_FILENAME
@@ -442,10 +442,10 @@ for log_basename in /var/log/Xorg; do
             append_silent "${log_filename}"
 
             # look for the X configuration files/directories referenced by this X log
-            if [ -f ${log_filename} -a -r ${log_filename} ]; then
-                config_file=`grep "Using config file" ${log_filename} | cut -f 2 -d \"`
-                config_dir=`grep "Using config directory" ${log_filename} | cut -f 2 -d \"`
-                sys_config_dir=`grep "Using system config directory" ${log_filename} | cut -f 2 -d \"`
+            if [ -f ${log_filename} ] && [ -r ${log_filename} ]; then
+                config_file="$(grep "Using config file" ${log_filename} | cut -f 2 -d \")"
+                config_dir="$(grep "Using config directory" ${log_filename} | cut -f 2 -d \")"
+                sys_config_dir="$(grep "Using system config directory" ${log_filename} | cut -f 2 -d \")"
                 for j in "$config_file" "$config_dir" "$sys_config_dir"; do
                     if [ "$j" ]; then
                         # multiple of the logs we find above might reference the
@@ -453,7 +453,7 @@ for log_basename in /var/log/Xorg; do
                         # configuration files we find, and only append X
                         # configuration files we have not already appended
                         echo "${xconfig_file_list}" | grep ":${j}:" > /dev/null
-                        if [ "$?" != "0" ]; then
+                        if [ "$?" != '0' ]; then
                             xconfig_file_list="${xconfig_file_list}:${j}:"
                             if [ -d "$j" ]; then
                                 append_glob "$j/*.conf"
@@ -473,17 +473,17 @@ done
 
 
 (
-    echo "____________________________________________"
+    print '%s\n' "____________________________________________"
 
     # print epilogue to log file
 
-    echo ""
-    echo "End of OpenMandriva bug report log file."
+    print '%s\n' ""
+    print '%s\n' "End of OpenMandriva bug report log file."
 ) | $XZ_CMD >> $LOG_FILENAME
 
 # Done
 
-echo " complete."
-echo ""
+print '%s\n' " complete."
+print '%s\n' ""
 
 #EOF
