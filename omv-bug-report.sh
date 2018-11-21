@@ -28,26 +28,26 @@ set_filename() {
 
 
 usage_bug_report_message() {
-    print '%s\n' "Please include the '$LOG_FILENAME' log file when reporting"
-    print '%s\n' "your bug via the OpenMandriva bugzilla (see issues.openmandriva.org)."
+    printf '%s\n' "Please include the '$LOG_FILENAME' log file when reporting"
+    printf '%s\n' "your bug via the OpenMandriva bugzilla (see issues.openmandriva.org)."
 }
 
 usage() {
-    print '%s\n' ""
-    print '%s\n' "$(basename $0): OpenMandriva bug reporting shell script."
-    print '%s\n' ""
+    printf '%s\n' ""
+    printf '%s\n' "$(basename $0): OpenMandriva bug reporting shell script."
+    printf '%s\n' ""
     usage_bug_report_message
-    print '%s\n' ""
-    print '%s\n' "$(basename $0) [OPTION]..."
-    print '%s\n' "    -h / --help"
-    print '%s\n' "        Print this help output and exit."
-    print '%s\n' "    --output-file <file>"
-    print '%s\n' "        Write output to <file>. If xz is available, the output file"
-    print '%s\n' "        will be automatically compressed, and \".xz\" will be appended"
-    print '%s\n' "        to the filename. Default: write to omv-bug-report.log(.xz)."
-    print '%s\n' "    --safe-mode"
-    print '%s\n' "        Disable some parts of the script that may hang the system."
-    print '%s\n' ""
+    printf '%s\n' ""
+    printf '%s\n' "$(basename $0) [OPTION]..."
+    printf '%s\n' "    -h / --help"
+    printf '%s\n' "        Print this help output and exit."
+    printf '%s\n' "    --output-file <file>"
+    printf '%s\n' "        Write output to <file>. If xz is available, the output file"
+    printf '%s\n' "        will be automatically compressed, and \".xz\" will be appended"
+    printf '%s\n' "        to the filename. Default: write to omv-bug-report.log(.xz)."
+    printf '%s\n' "    --safe-mode"
+    printf '%s\n' "        Disable some parts of the script that may hang the system."
+    printf '%s\n' ""
 }
 
 OMV_BUG_REPORT_CHANGE='$Change: 002 $'
@@ -56,7 +56,7 @@ OMV_BUG_REPORT_VERSION="$(echo "$OMV_BUG_REPORT_CHANGE" | tr -c -d "[:digit:]")"
 # Set the default filename so that it won't be empty in the usage message
 set_filename
 
-# Parse arguments: Optionally set output file, or print help
+# Parse arguments: Optionally set output file, or printf help
 SAVED_FLAGS=$@
 while [ "$1" != "" ]; do
     case $1 in
@@ -103,36 +103,36 @@ echo_metadata() {
 
 append() {
     (
-        print '%s\n' "____________________________________________"
-        print '%s\n' ""
+        printf '%s\n' "____________________________________________"
+        printf '%s\n' ""
 
         if [ ! -f "$1" ]; then
-            print '%s\n' "*** $1 does not exist"
+            printf '%s\n' "*** $1 does not exist"
         elif [ ! -r "$1" ]; then
-            print '%s\n' "*** $1 is not readable"
+            printf '%s\n' "*** $1 is not readable"
         else
-            print '%s\n' "*** $1"
+            printf '%s\n' "*** $1"
             echo_metadata "$1"
             cat  "$1"
         fi
-        print '%s\n' ""
+        printf '%s\n' ""
     ) | $XZ_CMD >> $LOG_FILENAME
 }
 
 #
-# append_silent() - same as append(), but don't print anything
+# append_silent() - same as append(), but don't printf anything
 # if the file does not exist
 #
 
 append_silent() {
     (
         if [ -f "$1" ] && [ -r "$1" ]; then
-            print '%s\n' "____________________________________________"
-            print '%s\n' ""
-            print '%s\n' "*** $1"
+            printf '%s\n' "____________________________________________"
+            printf '%s\n' ""
+            printf '%s\n' "*** $1"
             echo_metadata "$1"
             cat  "$1"
-            print '%s\n' ""
+            printf '%s\n' ""
         fi
     ) | $XZ_CMD >> $LOG_FILENAME
 }
@@ -150,7 +150,7 @@ append_glob() {
 
 #
 # append_file_or_dir_silent() - if $1 is a regular file, append it; otherwise,
-# if $1 is a directory, append all files under it.  Don't print anything if the
+# if $1 is a directory, append all files under it.  Don't printf anything if the
 # file does not exist.
 #
 
@@ -173,16 +173,16 @@ append_binary_file() {
 
         if [ $? -eq 0 ] && [ -x "$base64" ]; then
                 if [ -f "$1" ] && [ -r "$1" ]; then
-                    print '%s\n' "____________________________________________"
-                    print '%s\n' ""
-                    print '%s\n' "base64 \"$1\""
-                    print '%s\n' ""
+                    printf '%s\n' "____________________________________________"
+                    printf '%s\n' ""
+                    printf '%s\n' "base64 \"$1\""
+                    printf '%s\n' ""
                     base64 "$1" 2> /dev/null
-                    print '%s\n' ""
+                    printf '%s\n' ""
                 fi
         else
-            print '%s\n' "Skipping $1 output (base64 not found)"
-            print '%s\n' ""
+            printf '%s\n' "Skipping $1 output (base64 not found)"
+            printf '%s\n' ""
         fi
 
     ) | $XZ_CMD >> $LOG_FILENAME
@@ -197,7 +197,7 @@ append_binary_file() {
 # accessing kernel log files)
 
 if [ "$(id -u)" -ne 0 ]; then
-    print '%s\n' "ERROR: Please run $(basename $0) as root."
+    printf '%s\n' "ERROR: Please run $(basename $0) as root."
     exit 1
 fi
 
@@ -214,42 +214,42 @@ fi
 touch $LOG_FILENAME 2> /dev/null
 
 if [ $? -ne 0 ]; then
-    print '%s\n' ""
-    print '%s\n' "ERROR: Working directory is not writable; please cd to a directory"
-    print '%s\n' "       where you have write permission so that the $LOG_FILENAME"
-    print '%s\n' "       file can be written."
-    print '%s\n' ""
+    printf '%s\n' ""
+    printf '%s\n' "ERROR: Working directory is not writable; please cd to a directory"
+    printf '%s\n' "       where you have write permission so that the $LOG_FILENAME"
+    printf '%s\n' "       file can be written."
+    printf '%s\n' ""
     exit 1
 fi
 
 
-# print a start message to stdout
+# printf a start message to stdout
 
-print '%s\n' ""
-print '%s\n' "omv-bug-report.sh will now collect information about your"
-print '%s\n' "system and create the file '$LOG_FILENAME' in the current"
-print '%s\n' "directory.  It may take several seconds to run."
-print '%s\n' ""
+printf '%s\n' ""
+printf '%s\n' "omv-bug-report.sh will now collect information about your"
+printf '%s\n' "system and create the file '$LOG_FILENAME' in the current"
+printf '%s\n' "directory.  It may take several seconds to run."
+printf '%s\n' ""
 usage_bug_report_message
-print '%s\n' ""
-print '%s\n' "Running $(basename $0)...";
+printf '%s\n' ""
+printf '%s\n' "Running $(basename $0)...";
 
 
-# print prologue to the log file
+# printf prologue to the log file
 
 (
-    print '%s\n' "____________________________________________"
-    print '%s\n' ""
-    print '%s\n' "Start of OpenMandriva bug report log file.  Please include this file, along"
-    print '%s\n' "with a detailed description of your problem, when reporting a bug"
-    print '%s\n' "via the OpenMandriva bugzilla (see issues.openmandriva.org)."
-    print '%s\n' ""
-    print '%s\n' "omv-bug-report.sh Version: $OMV_BUG_REPORT_VERSION"
-    print '%s\n' ""
-    print '%s\n' "Date: $(date)"
-    print '%s\n' "uname: $(uname -a)"
-    print '%s\n' "command line flags: $SAVED_FLAGS"
-    print '%s\n' ""
+    printf '%s\n' "____________________________________________"
+    printf '%s\n' ""
+    printf '%s\n' "Start of OpenMandriva bug report log file.  Please include this file, along"
+    printf '%s\n' "with a detailed description of your problem, when reporting a bug"
+    printf '%s\n' "via the OpenMandriva bugzilla (see issues.openmandriva.org)."
+    printf '%s\n' ""
+    printf '%s\n' "omv-bug-report.sh Version: $OMV_BUG_REPORT_VERSION"
+    printf '%s\n' ""
+    printf '%s\n' "Date: $(date)"
+    printf '%s\n' "uname: $(uname -a)"
+    printf '%s\n' "command line flags: $SAVED_FLAGS"
+    printf '%s\n' ""
 ) | $XZ_CMD >> $LOG_FILENAME
 
 
@@ -257,11 +257,11 @@ print '%s\n' "Running $(basename $0)...";
 
 (
 
-    print '%s\n' ""
-    print '%s\n' "____________________________________________"
-    print '%s\n' ""
-    print '%s\n' "System host infrmation:"
-    print '%s\n' ""
+    printf '%s\n' ""
+    printf '%s\n' "____________________________________________"
+    printf '%s\n' ""
+    printf '%s\n' "System host infrmation:"
+    printf '%s\n' ""
     hostnamectl 2> /dev/null
 ) | $XZ_CMD >> $LOG_FILENAME
 
@@ -272,11 +272,11 @@ append_silent "/etc/os-release"
 # append environment output
 
 (
-    print '%s\n' ""
-    print '%s\n' "____________________________________________"
-    print '%s\n' ""
-    print '%s\n' "Environment settings:"
-    print '%s\n' ""
+    printf '%s\n' ""
+    printf '%s\n' "____________________________________________"
+    printf '%s\n' ""
+    printf '%s\n' "Environment settings:"
+    printf '%s\n' ""
     systemctl show-environment 2> /dev/null
 ) | $XZ_CMD >> $LOG_FILENAME
 
@@ -323,11 +323,11 @@ done
 # append installed rpm output
 
 (
-    print '%s\n' ""
-    print '%s\n' "____________________________________________"
-    print '%s\n' ""
-    print '%s\n' "Installed packages:"
-    print '%s\n' ""
+    printf '%s\n' ""
+    printf '%s\n' "____________________________________________"
+    printf '%s\n' ""
+    printf '%s\n' "Installed packages:"
+    printf '%s\n' ""
     rpm -qa | sort -u 2> /dev/null
 ) | $XZ_CMD >> $LOG_FILENAME
 
@@ -335,96 +335,96 @@ done
 # lspcidrake information
 
 (
-    print '%s\n' "____________________________________________"
-    print '%s\n' ""
+    printf '%s\n' "____________________________________________"
+    printf '%s\n' ""
 
     lspci="$(which lspci 2> /dev/null | head -n 1)"
 
     if [ $? -eq 0 ] && [ -x "$lspci" ]; then
-        print '%s\n' "$lspci"
-        print '%s\n' ""
+        printf '%s\n' "$lspci"
+        printf '%s\n' ""
         $lspci -v 2> /dev/null
-        print '%s\n' ""
+        printf '%s\n' ""
     else
-        print '%s\n' "Skipping lspci output (lspci not found)"
-        print '%s\n' ""
+        printf '%s\n' "Skipping lspci output (lspci not found)"
+        printf '%s\n' ""
     fi
 ) | $XZ_CMD >> $LOG_FILENAME
 
 # lsusb information
 
 (
-    print '%s\n' "____________________________________________"
-    print '%s\n' ""
+    printf '%s\n' "____________________________________________"
+    printf '%s\n' ""
 
     lsusb="$(which lsusb 2> /dev/null | head -n 1)"
 
     if [ $? -eq 0 ] && [ -x "$lsusb" ]; then
-        print '%s\n' "$lsusb"
-        print '%s\n' ""
+        printf '%s\n' "$lsusb"
+        printf '%s\n' ""
         $lsusb 2> /dev/null
-        print '%s\n' ""
+        printf '%s\n' ""
     else
-        print '%s\n' "Skipping lsusb output (lsusb not found)"
-        print '%s\n' ""
+        printf '%s\n' "Skipping lsusb output (lsusb not found)"
+        printf '%s\n' ""
     fi
 ) | $XZ_CMD >> $LOG_FILENAME
 
 # dmidecode
 
 (
-    print '%s\n' "____________________________________________"
-    print '%s\n' ""
+    printf '%s\n' "____________________________________________"
+    printf '%s\n' ""
 
     dmidecode="$(which dmidecode 2> /dev/null | head -n 1)"
 
     if [ $? -eq 0 ] && [ -x "$dmidecode" ]; then
-        print '%s\n' "$dmidecode"
-        print '%s\n' ""
+        printf '%s\n' "$dmidecode"
+        printf '%s\n' ""
         $dmidecode 2> /dev/null
-        print '%s\n' ""
+        printf '%s\n' ""
     else
-        print '%s\n' "Skipping dmidecode output (dmidecode not found)"
-        print '%s\n' ""
+        printf '%s\n' "Skipping dmidecode output (dmidecode not found)"
+        printf '%s\n' ""
     fi
 ) | $XZ_CMD >> $LOG_FILENAME
 
 # append journalctl output
 
 (
-    print '%s\n' ""
-    print '%s\n' "____________________________________________"
-    print '%s\n' ""
-    print '%s\n' "Systemd boot log:"
-    print '%s\n' ""
+    printf '%s\n' ""
+    printf '%s\n' "____________________________________________"
+    printf '%s\n' ""
+    printf '%s\n' "Systemd boot log:"
+    printf '%s\n' ""
     journalctl -b 2> /dev/null
 ) | $XZ_CMD >> $LOG_FILENAME
 
 # append systemctl --failed output
 
 (
-    print '%s\n' ""
-    print '%s\n' "____________________________________________"
-    print '%s\n' ""
-    print '%s\n' "Systemd failed units:"
-    print '%s\n' ""
+    printf '%s\n' ""
+    printf '%s\n' "____________________________________________"
+    printf '%s\n' ""
+    printf '%s\n' "Systemd failed units:"
+    printf '%s\n' ""
     systemctl --no-pager --failed 2> /dev/null
 ) | $XZ_CMD >> $LOG_FILENAME
 
-# print gcc & g++ version info
+# printf gcc & g++ version info
 
 (
     which gcc >/dev/null 2>&1
     if [ $? -eq 0 ]; then
-        print '%s\n' "____________________________________________"
-        print '%s\n' ""
+        printf '%s\n' "____________________________________________"
+        printf '%s\n' ""
         gcc -v 2>&1
     fi
 
     which g++ >/dev/null 2>&1
     if [ $? -eq 0 ]; then
-        print '%s\n' "____________________________________________"
-        print '%s\n' ""
+        printf '%s\n' "____________________________________________"
+        printf '%s\n' ""
         g++ -v 2>&1
     fi
 ) | $XZ_CMD >> $LOG_FILENAME
@@ -473,17 +473,17 @@ done
 
 
 (
-    print '%s\n' "____________________________________________"
+    printf '%s\n' "____________________________________________"
 
-    # print epilogue to log file
+    # printf epilogue to log file
 
-    print '%s\n' ""
-    print '%s\n' "End of OpenMandriva bug report log file."
+    printf '%s\n' ""
+    printf '%s\n' "End of OpenMandriva bug report log file."
 ) | $XZ_CMD >> $LOG_FILENAME
 
 # Done
 
-print '%s\n' " complete."
-print '%s\n' ""
+printf '%s\n' " complete."
+printf '%s\n' ""
 
 #EOF
