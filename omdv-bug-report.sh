@@ -6,29 +6,17 @@
 
 PATH="/sbin:/usr/sbin:$PATH"
 
-BASE_LOG_FILENAME="omv-bug-report.log"
-
-# check if Zstandard compression tool is present
-COMP_CMD="$(command -v zstd)"
-if [ -n "$COMP_CMD" ]; then
-    COMP_CMD="zstd -15 -T0 -c"
-else
-    COMP_CMD="cat"
-fi
+BASE_LOG_FILENAME="omdv-bug-report-$(date +%Y%m%d%H%M%S).log"
+COMP_CMD="cat"
 
 set_filename() {
-    if [ "$COMP_CMD" = "zstd -15 -T0 -c" ]; then
-        LOG_FILENAME="$BASE_LOG_FILENAME.zst"
-        OLD_LOG_FILENAME="$BASE_LOG_FILENAME.old.zst"
-    else
-        LOG_FILENAME=$BASE_LOG_FILENAME
-        OLD_LOG_FILENAME="$BASE_LOG_FILENAME.old"
-    fi
+    LOG_FILENAME=$BASE_LOG_FILENAME
+    OLD_LOG_FILENAME="$BASE_LOG_FILENAME.old"
 }
 
 usage_bug_report_message() {
-    printf '%s\n' "Please include the '$LOG_FILENAME' log file when reporting"
-    printf '%s\n' "your bug via the OpenMandriva bugzilla (see issues.openmandriva.org)."
+    printf '%s\n' "Please include the '$LOG_FILENAME' file when reporting"
+    printf '%s\n' "your bug via the https://issues.openmandriva.org ."
 }
 
 usage() {
@@ -40,17 +28,18 @@ usage() {
     printf '%s\n' "$(basename $0) [OPTION]..."
     printf '%s\n' "    -h / --help"
     printf '%s\n' "        Print this help output and exit."
-    printf '%s\n' "    --output-file <file>"
-    printf '%s\n' "        Write output to <file>. If zstd is available, the output file"
-    printf '%s\n' "        will be automatically compressed, and \".zst\" will be appended"
-    printf '%s\n' "        to the filename. Default: write to omv-bug-report.log(.zst)."
-    printf '%s\n' "    --safe-mode"
-    printf '%s\n' "        Disable some parts of the script that may hang the system."
+    printf '%s\n' "    -o / --output-file <file>"
+    printf '%s\n' "        Write output to <file>."
+    printf '%s\n' "        Default: write to omdv-bug-report.log(.zst)."
+    printf '%s\n' "    -c / --compress"
+    printf '%s\n' "        If zstd is available, the output file"
+    printf '%s\n' "        will be automatically compressed, and \".zst\" "
+    printf '%s\n' "        will be appended to the filename."
     printf '%s\n' ""
 }
 
-OMV_BUG_REPORT_CHANGE='$Change: 003 $'
-OMV_BUG_REPORT_VERSION="$(echo "$OMV_BUG_REPORT_CHANGE" | tr -c -d "[:digit:]")"
+OMDV_BUG_REPORT_CHANGE='$Change: 004 $'
+OMDV_BUG_REPORT_VERSION="$(printf '%s\n' "$OMDV_BUG_REPORT_CHANGE" | tr -c -d "[:digit:]")"
 
 # Set the default filename so that it won't be empty in the usage message
 set_filename
@@ -62,14 +51,23 @@ while [ "$1" != "" ]; do
         -o | --output-file )    if [ -z $2 ]; then
                                     usage
                                     exit 1
-                                elif [ "$(echo "$2" | cut -c 1)" = "-" ]; then
-                                    echo "Warning: Questionable filename"\
+                                elif [ "$(printf '%s\n' "$2" | cut -c 1)" = "-" ]; then
+                                    printf '%s\n' "Warning: Questionable filename"\
                                          "\"$2\": possible missing argument?"
                                 fi
                                 BASE_LOG_FILENAME="$2"
                                 # override the default filename
                                 set_filename
                                 shift
+                                ;;
+        -c | --compress )       if ! command -v zstd 2>&1 > /dev/null ; then
+                                    printf '%s\n' "zstd compression program is missing."
+                                    printf '%s\n' "zstd compression program is missing."
+                                else
+                                    COMP_CMD="zstd -15 -T0 -c"
+                                    LOG_FILENAME="$BASE_LOG_FILENAME.zst"
+                                    OLD_LOG_FILENAME="$BASE_LOG_FILENAME.old.zst"
+                                fi
                                 ;;
         -h | --help )           usage
                                 exit
@@ -200,7 +198,6 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
-
 # move any old log file (zipped) out of the way
 
 if [ -f $LOG_FILENAME ]; then
@@ -223,11 +220,9 @@ fi
 # printf a start message to stdout
 
 printf '%s\n' ""
-printf '%s\n' "omv-bug-report.sh will now collect information about your"
+printf '%s\n' "omdv-bug-report.sh will now collect information about your"
 printf '%s\n' "system and create the file '$LOG_FILENAME' in the current"
 printf '%s\n' "directory.  It may take several seconds to run."
-printf '%s\n' ""
-usage_bug_report_message
 printf '%s\n' ""
 printf '%s\n' "Running $(basename $0)...";
 
@@ -238,11 +233,11 @@ printf '%s\n' "Running $(basename $0)...";
     printf '%s\n' ""
     printf '%s\n' "Start of OpenMandriva bug report log file.  Please include this file, along"
     printf '%s\n' "with a detailed description of your problem, when reporting a bug"
-    printf '%s\n' "via the OpenMandriva bugzilla (see issues.openmandriva.org)."
+    printf '%s\n' "via the https://issues.openmandriva.org ."
     printf '%s\n' ""
-    printf '%s\n' "omv-bug-report.sh Version: $OMV_BUG_REPORT_VERSION"
+    printf '%s\n' "omdv-bug-report.sh Version: $OMDV_BUG_REPORT_VERSION"
     printf '%s\n' ""
-    printf '%s\n' "Date: $(date)"
+    printf '%s\n' "Generation date: $(date)"
     printf '%s\n' "uname: $(uname -a)"
     printf '%s\n' "command line flags: $SAVED_FLAGS"
     printf '%s\n' ""
@@ -251,7 +246,6 @@ printf '%s\n' "Running $(basename $0)...";
 # hostnamectl information
 
 (
-
     printf '%s\n' ""
     printf '%s\n' "____________________________________________"
     printf '%s\n' ""
@@ -465,7 +459,7 @@ for log_basename in /var/log/Xorg; do
                         # same X configuration file; keep a list of which X
                         # configuration files we find, and only append X
                         # configuration files we have not already appended
-                        echo "${xconfig_file_list}" | grep ":${j}:" > /dev/null
+                        printf '%s\n' "${xconfig_file_list}" | grep ":${j}:" > /dev/null
                         if [ "$?" != '0' ]; then
                             xconfig_file_list="${xconfig_file_list}:${j}:"
                             if [ -d "$j" ]; then
@@ -508,7 +502,8 @@ sync > /dev/null 2>&1
 
 # Done
 
-printf '%s\n' " complete."
+printf '%s\n' "... done."
+usage_bug_report_message
 printf '%s\n' ""
 
 #EOF
