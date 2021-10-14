@@ -1,7 +1,7 @@
 Summary:	%{distribution} bug helper
 Name:		omdv-bug-report
 Version:	0.0.4
-Release:	1
+Release:	2
 License:	GPLv3+
 Group:		System/Base
 Url:		%{disturl}
