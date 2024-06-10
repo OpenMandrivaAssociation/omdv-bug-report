@@ -1,7 +1,7 @@
 Summary:	%{distribution} bug helper
 Name:		omdv-bug-report
-Version:	0.0.4
-Release:	4
+Version:	0.0.5
+Release:	1
 License:	GPLv3+
 Group:		System/Base
 Url:		%{disturl}
@@ -28,7 +28,7 @@ A simple tool to gather system information to ease bug resolve.
 
 %install
 mkdir -p %{buildroot}%{_bindir}
-install -m755 %{SOURCE0} %{buildroot}%{_bindir}/%{name}
+install -c -m755 %{SOURCE0} %{buildroot}%{_bindir}/%{name}
 ln -sf %{_bindir}/%{name} %{buildroot}%{_bindir}/%{name}.sh
 
 # (tpg) keep comapt with old name

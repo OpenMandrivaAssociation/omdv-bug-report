@@ -4,8 +4,6 @@
 # by TPG (tpgxyz@gmail.com)
 # www.openmandriva.org
 
-PATH="/sbin:/usr/sbin:$PATH"
-
 BASE_LOG_FILENAME="omdv-bug-report-$(date +%Y%m%d%H%M%S).log"
 COMP_CMD="cat"
 
@@ -35,6 +33,10 @@ usage() {
     printf '%s\n' "        If zstd is available, the output file"
     printf '%s\n' "        will be automatically compressed, and \".zst\" "
     printf '%s\n' "        will be appended to the filename."
+    printf '%s\n' "    -u / --user"
+    printf '%s\n' "        Make the file owned by the given user and put it"
+    printf '%s\n' "        in the user's home directory unless -o was given"
+    printf '%s\n' "        with an absolute path"
     printf '%s\n' ""
 }
 
@@ -56,6 +58,9 @@ while [ "$1" != "" ]; do
                                          "\"$2\": possible missing argument?"
                                 fi
                                 BASE_LOG_FILENAME="$2"
+                                if [ -n "$PW_DIR" -a "$(echo $BASE_LOG_FILENAME |cut -b1)" != "/" ]; then
+                                    BASE_LOG_FILENAME="$PW_DIR/$BASE_LOG_FILENAME"
+                                fi
                                 # override the default filename
                                 set_filename
                                 shift
@@ -71,6 +76,21 @@ while [ "$1" != "" ]; do
                                 ;;
         -h | --help )           usage
                                 exit
+                                ;;
+        -u | --user )           USERNAME="$2"
+                                shift
+                                P="$(grep "^$USERNAME:" /etc/passwd)"
+                                if [ "$?" != "0" ]; then
+                                    echo "No such user $USERNAME"
+                                    exit 1
+                                fi
+                                PW_UID="$(echo $P |cut -d: -f3)"
+                                PW_GID="$(echo $P |cut -d: -f4)"
+                                PW_DIR="$(echo $P |cut -d: -f6)"
+                                if [ -n "$BASE_LOG_FILENAME" -a "$(echo $BASE_LOG_FILENAME |cut -b1)" != "/" ]; then
+                                    BASE_LOG_FILENAME="$PW_DIR/$BASE_LOG_FILENAME"
+                                    set_filename
+                                fi
                                 ;;
         * )                     usage
                                 exit 1
@@ -221,8 +241,8 @@ fi
 
 printf '%s\n' ""
 printf '%s\n' "omdv-bug-report.sh will now collect information about your"
-printf '%s\n' "system and create the file '$LOG_FILENAME' in the current"
-printf '%s\n' "directory.  It may take several seconds to run."
+printf '%s\n' "system and create the file '$LOG_FILENAME'."
+printf '%s\n' "It may take several seconds to run."
 printf '%s\n' ""
 printf '%s\n' "Running $(basename $0)...";
 
@@ -503,6 +523,9 @@ sync > /dev/null 2>&1
 # Done
 
 printf '%s\n' "... done."
+if [ -n "$PW_UID" -a -n "$PW_GID" ]; then
+    chown "$PW_UID:$PW_GID" "$LOG_FILENAME"
+fi
 usage_bug_report_message
 printf '%s\n' ""
 
